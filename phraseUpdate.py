@@ -59,6 +59,9 @@ with st.form(key="update"):
                 worksheet="Sheet5",
                 data=data,
             )
+        
+        # in the end clear the input fields
+        st.experimental_rerun()
 
 length = len(data['Phrase'].loc[data['Phrase'].notna() & (data['Phrase'] != '')])
 
