@@ -36,6 +36,9 @@ with st.form(key="update"):
     if st.form_submit_button("Update", use_container_width=True, type="primary"):
         if phrase == "" or meaning == "" or example == "":
             st.warning("Please fill all the fields marked with [*]")
+        # if phrase already exists, then don't allow
+        elif phrase in data['Phrase'].values:
+            st.error("Phrase already exists!")
         else:
             st.success("Data updated successfully!")
             # Get the length of the data that contains values
