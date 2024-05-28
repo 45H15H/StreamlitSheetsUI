@@ -68,6 +68,3 @@ with st.form(key="update"):
 length = len(data['Phrase'].loc[data['Phrase'].notna() & (data['Phrase'] != '')])
 
 st.dataframe(data.iloc[:length], width=1200, height=200, hide_index=True)
-
-# in the end clear the input fields
-st.experimental_rerun()
