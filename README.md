@@ -43,4 +43,4 @@ You will need to create a google service account to use this application. To do 
 
 ## Status
 
-This project is currently in _complete_.
+This project is _complete_.
