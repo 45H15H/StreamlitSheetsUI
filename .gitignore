@@ -1,2 +1,3 @@
 .StreamlitSheetsUI/*
+.sheet_UI_env/*
 .streamlit/secrets.toml
