@@ -16,7 +16,7 @@ from datetime import datetime
 today = datetime.today().strftime("%m/%d/%Y")
 
 
-data = connection.read(worksheet = "Sheet5", usecols = [0, 1, 2, 3, 4])
+data = connection.read(worksheet = "Sheet5", usecols = [0, 1, 2, 3, 4], ttl=0)
 # data = pd.read_csv("Useful-Phrases-Sheet2.csv")
 
 with st.form(key="update"):
@@ -36,32 +36,36 @@ with st.form(key="update"):
     if st.form_submit_button("Update", use_container_width=True, type="primary"):
         if phrase == "" or meaning == "" or example == "":
             st.warning("Please fill all the fields marked with [*]")
-        # if phrase already exists, then don't allow
-        elif phrase in data['Phrase'].values:
-            st.error("Phrase already exists!")
         else:
-            st.success("Data updated successfully!")
-            # Get the length of the data that contains values
-            length = len(data['Phrase'].loc[data['Phrase'].notna() & (data['Phrase'] != '')])
-            
-            data = data.iloc[:length]
-            
-            data = data.append(
-                {   
-                    "S. No.": length + 1,
-                    "Date": today,
-                    "Phrase": phrase,
-                    "Meaning": meaning,
-                    "Example": example
-                }
-                ,
-                ignore_index=True
-            )
-    
-            connection.update(
-                worksheet="Sheet5",
-                data=data,
-            )
+            # Read latest sheet data at submit time to avoid cache-based overwrite.
+            latest_data = connection.read(worksheet="Sheet5", usecols=[0, 1, 2, 3, 4], ttl=0)
+
+            # if phrase already exists, then don't allow
+            if phrase in latest_data['Phrase'].values:
+                st.error("Phrase already exists!")
+            else:
+                # Keep only rows where Phrase exists, then append a new row.
+                valid_rows = latest_data['Phrase'].notna() & (latest_data['Phrase'] != '')
+                latest_data = latest_data.loc[valid_rows].copy()
+                length = len(latest_data)
+
+                new_row = pd.DataFrame([
+                    {
+                        "S. No.": length + 1,
+                        "Date": today,
+                        "Phrase": phrase,
+                        "Meaning": meaning,
+                        "Example": example,
+                    }
+                ])
+
+                data = pd.concat([latest_data, new_row], ignore_index=True)
+
+                connection.update(
+                    worksheet="Sheet5",
+                    data=data,
+                )
+                st.success("Data updated successfully!")
         
         
 
